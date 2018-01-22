@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Hydrogen.Prometheus.Client
 {
@@ -31,29 +30,6 @@ namespace Hydrogen.Prometheus.Client
         public string Help { get; }
 
         public List<Sample> Samples { get; }
-
-        //public override bool Equals(object obj)
-        //{
-        //    var other = obj as MetricFamilySamples;
-        //    if (other == null)
-        //    {
-        //        return false;
-        //    }
-        //    return other.Name == Name
-        //        && other.Type == Type
-        //        && other.Help == Help
-        //        && other.Samples.SequenceEqual(Samples);
-        //}
-
-        //public override int GetHashCode()
-        //{
-        //    int hashCode = 1;
-        //    hashCode = 37 * hashCode + Name.GetHashCode();
-        //    hashCode = 37 * hashCode + Type.GetHashCode();
-        //    hashCode = 37 * hashCode + Help.GetHashCode();
-        //    hashCode = 37 * hashCode + Samples.GetHashCode();
-        //    return hashCode;
-        //}
 
         public class Sample
         {
