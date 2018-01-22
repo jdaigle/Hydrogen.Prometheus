@@ -21,9 +21,25 @@ namespace Hydrogen.Prometheus.Client
             return FamilySamplesList(CollectorType.Counter, samples);
         }
 
+        protected override Child NewChild() => new Child();
+
+        /// <summary>
+        /// Return a Builder to allow configuration of a new Counter. Ensures required fields are provided.
+        /// </summary>
+        /// <param name="name">The name of the metric.</param>
+        /// <param name="help">The help string of the metric.</param>
+        public static CounterBuilder Build(string name, string help) => (CounterBuilder)new CounterBuilder().WithName(name).WithHelp(help);
+
+        /// <summary>
+        /// Return a Builder to allow configuration of a new Counter.
+        /// </summary>
+        public static CounterBuilder Build() => new CounterBuilder();
+
         public class Child
         {
             private double _value = 0;
+
+            internal Child() { }
 
             public double Value => _value;
 

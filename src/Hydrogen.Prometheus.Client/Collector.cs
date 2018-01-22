@@ -139,7 +139,6 @@ namespace Hydrogen.Prometheus.Client
     }
 
     public abstract class Collector<TChild> : Collector
-        where TChild : new()
     {
         protected readonly ConcurrentDictionary<string[], TChild> _children =
             new ConcurrentDictionary<string[], TChild>(LabelArrayEqualityComparer.Default);
@@ -164,7 +163,7 @@ namespace Hydrogen.Prometheus.Client
             {
                 throw new ArgumentException(nameof(labelValues), "Incorrect number of labels.");
             }
-            return _children.GetOrAdd(labelValues, _ => new TChild());
+            return _children.GetOrAdd(labelValues, _ => NewChild());
         }
 
         /// <summary>
@@ -189,6 +188,8 @@ namespace Hydrogen.Prometheus.Client
             InitializeNoLabelsChild();
         }
 
+        protected abstract TChild NewChild();
+
         protected List<MetricFamilySamples> FamilySamplesList(CollectorType type, List<MetricFamilySamples.Sample> samples) =>
             new List<MetricFamilySamples>(1)
             {
@@ -208,6 +209,8 @@ namespace Hydrogen.Prometheus.Client
             where TCollector : Collector<TChild>
         {
             protected abstract TCollector Create();
+
+            private protected Builder() : base() { }
 
             /// <summary>
             /// Register the Collector with the default registry.

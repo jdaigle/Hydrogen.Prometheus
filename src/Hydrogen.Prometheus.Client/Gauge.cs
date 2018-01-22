@@ -22,9 +22,25 @@ namespace Hydrogen.Prometheus.Client
             return FamilySamplesList(CollectorType.Guage, samples);
         }
 
+        protected override Child NewChild() => new Child();
+
+        /// <summary>
+        /// Return a Builder to allow configuration of a new Gauge. Ensures required fields are provided.
+        /// </summary>
+        /// <param name="name">The name of the metric.</param>
+        /// <param name="help">The help string of the metric.</param>
+        public static GaugeBuilder Build(string name, string help) => (GaugeBuilder)new GaugeBuilder().WithName(name).WithHelp(help);
+
+        /// <summary>
+        /// Return a Builder to allow configuration of a new Gauge.
+        /// </summary>
+        public static GaugeBuilder Build() => new GaugeBuilder();
+
         public class Child
         {
             private double _value = 0;
+
+            internal Child() { }
 
             public double Value => _value;
 

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Hydrogen.Prometheus.Client.Internal;
 
 namespace Hydrogen.Prometheus.Client.Exporters
 {
@@ -64,10 +65,10 @@ namespace Hydrogen.Prometheus.Client.Exporters
             foreach (var sample in metricFamily.Samples)
             {
                 await writer.WriteAsync(sample.Name);
-                if (sample.LabelNames.Length > 0)
+                if (sample.LabelNames.Count > 0)
                 {
                     await writer.WriteAsync('{');
-                    for (int i = 0; i < sample.LabelNames.Length; ++i)
+                    for (int i = 0; i < sample.LabelNames.Count; ++i)
                     {
                         await writer.WriteAsync(sample.LabelNames[i]);
                         await writer.WriteAsync("=\"");
@@ -77,7 +78,7 @@ namespace Hydrogen.Prometheus.Client.Exporters
                     await writer.WriteAsync('}');
                 }
                 await writer.WriteAsync(' ');
-                await writer.WriteAsync(DoubleToGoString(sample.Value));
+                await writer.WriteAsync(StringHelpers.DoubleToGoString(sample.Value));
                 await writer.WriteAsync('\n');
             }
         }
@@ -135,28 +136,11 @@ namespace Hydrogen.Prometheus.Client.Exporters
                     return "gauge";
                 case CollectorType.Histogram:
                     return "histogram";
-                case CollectorType.SUMMARY:
+                case CollectorType.Summary:
                     return "summary";
                 default:
                     return "untyped";
             }
-        }
-
-        private static string DoubleToGoString(double d)
-        {
-            if (d == double.PositiveInfinity)
-            {
-                return "+Inf";
-            }
-            if (d == double.NegativeInfinity)
-            {
-                return "-Inf";
-            }
-            if (double.IsNaN(d))
-            {
-                return "NaN";
-            }
-            return d.ToString();
         }
     }
 }

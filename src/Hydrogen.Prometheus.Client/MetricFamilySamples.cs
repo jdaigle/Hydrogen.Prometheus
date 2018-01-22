@@ -33,7 +33,7 @@ namespace Hydrogen.Prometheus.Client
 
         public class Sample
         {
-            public Sample(string name, string[] labelNames, string[] labelValues, double value)
+            public Sample(string name, IList<string> labelNames, IList<string> labelValues, double value)
             {
                 if (string.IsNullOrWhiteSpace(name))
                 {
@@ -48,9 +48,9 @@ namespace Hydrogen.Prometheus.Client
 
             public string Name { get; }
 
-            public string[] LabelNames { get; }
+            public IList<string> LabelNames { get; }
 
-            public string[] LabelValues { get; }
+            public IList<string> LabelValues { get; }
 
             public double Value { get; }
         }

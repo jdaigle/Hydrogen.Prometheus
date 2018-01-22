@@ -4,7 +4,7 @@
     {
         Counter,
         Guage,
-        SUMMARY,
         Histogram,
+        Summary,
     }
 }
