@@ -8,13 +8,17 @@ namespace Hydrogen.Prometheus.Client
 {
     public abstract class Collector
     {
-        private static readonly Regex MetricNameRegex = new Regex("[a-zA-Z_:][a-zA-Z0-9_:]*", RegexOptions.Compiled);
-        private static readonly Regex MetricLabelNameRegex = new Regex("[a-zA-Z_][a-zA-Z0-9_]*", RegexOptions.Compiled);
-        private static readonly Regex ReservedMetricLabelNameRegex = new Regex("__.*", RegexOptions.Compiled);
+        private static readonly Regex MetricNameRegex = new Regex("^[a-zA-Z_:][a-zA-Z0-9_:]*$", RegexOptions.Compiled);
+        private static readonly Regex MetricLabelNameRegex = new Regex("^[a-zA-Z_][a-zA-Z0-9_]*$", RegexOptions.Compiled);
+        private static readonly Regex ReservedMetricLabelNameRegex = new Regex("^__.*", RegexOptions.Compiled);
 
         protected readonly string _fullname;
         protected readonly string _help;
         protected readonly string[] _labelNames;
+
+        public string Name => _fullname;
+
+        public string Help => _help;
 
         private protected Collector(Builder builder)
         {
@@ -23,7 +27,11 @@ namespace Hydrogen.Prometheus.Client
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            var name = builder.Name ?? throw new ArgumentNullException(nameof(builder.Name), "Name hasn't been set.");
+            if (string.IsNullOrWhiteSpace(builder.Name))
+            {
+                throw new ArgumentNullException(nameof(builder.Name), "Name hasn't been set.");
+            }
+            var name = builder.Name;
             if (!string.IsNullOrWhiteSpace(builder.Subsystem))
             {
                 name = builder.Subsystem + "_" + name;
@@ -35,7 +43,11 @@ namespace Hydrogen.Prometheus.Client
             _fullname = name;
             CheckMetricName(_fullname);
 
-            _help = builder.Help ?? throw new ArgumentNullException(nameof(builder.Help), "Help hasn't been set.");
+            if (string.IsNullOrWhiteSpace(builder.Help))
+            {
+                throw new ArgumentNullException(nameof(builder.Help), "Help hasn't been set.");
+            }
+            _help = builder.Help;
 
             _labelNames = builder.LabelNames ?? Array.Empty<string>();
             foreach (var labelName in _labelNames)
@@ -63,7 +75,7 @@ namespace Hydrogen.Prometheus.Client
             {
                 throw new ArgumentException("Invalid metric label name: " + name);
             }
-            if (!ReservedMetricLabelNameRegex.IsMatch(name))
+            if (ReservedMetricLabelNameRegex.IsMatch(name))
             {
                 throw new ArgumentException("Invalid metric label name, reserved for internal use: " + name);
             }
@@ -71,70 +83,15 @@ namespace Hydrogen.Prometheus.Client
 
         public abstract class Builder
         {
-            public string Name { get; private set; } = string.Empty;
+            public string Name { get; protected set; } = string.Empty;
 
-            public string Namespace { get; private set; } = string.Empty;
+            public string Namespace { get; protected set; } = string.Empty;
 
-            public string Subsystem { get; private set; } = string.Empty;
+            public string Subsystem { get; protected set; } = string.Empty;
 
-            public string Help { get; private set; } = string.Empty;
+            public string Help { get; protected set; } = string.Empty;
 
-            public string[] LabelNames { get; private set; } = Array.Empty<string>();
-
-            /// <summary>
-            /// Set the name of the metric. Required.
-            /// </summary>
-            public Builder WithName(string name)
-            {
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    throw new ArgumentException("Name is required.", nameof(name));
-                }
-
-                Name = name.Trim();
-                return this;
-            }
-
-            /// <summary>
-            /// Sets an optional namespace name.
-            /// </summary>
-            public Builder WithNamespace(string ns)
-            {
-                Namespace = (ns ?? string.Empty).Trim();
-                return this;
-            }
-
-            /// <summary>
-            /// Sets an optional subsystem name.
-            /// </summary>
-            public Builder WithSubsystem(string subsystem)
-            {
-                Subsystem = (subsystem ?? string.Empty).Trim();
-                return this;
-            }
-
-            /// <summary>
-            /// Set the help string of the metric. Required.
-            /// </summary>
-            public Builder WithHelp(string help)
-            {
-                if (string.IsNullOrWhiteSpace(help))
-                {
-                    throw new ArgumentException("Help text is required.", nameof(help));
-                }
-
-                Help = help.Trim();
-                return this;
-            }
-
-            /// <summary>
-            /// Set the labelNames of the metric. Optional, defaults to no labels.
-            /// </summary>
-            public Builder WithLabels(params string[] labelNames)
-            {
-                LabelNames = labelNames ?? throw new ArgumentNullException(nameof(labelNames));
-                return this;
-            }
+            public string[] LabelNames { get; protected set; } = Array.Empty<string>();
         }
     }
 
@@ -213,14 +170,74 @@ namespace Hydrogen.Prometheus.Client
             private protected Builder() : base() { }
 
             /// <summary>
+            /// Set the name of the metric. Required.
+            /// </summary>
+            public Builder<TCollector> WithName(string name)
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    throw new ArgumentException("Name is required.", nameof(name));
+                }
+
+                Name = name.Trim();
+                return this;
+            }
+
+            /// <summary>
+            /// Sets an optional namespace name.
+            /// </summary>
+            public Builder<TCollector> WithNamespace(string ns)
+            {
+                Namespace = (ns ?? string.Empty).Trim();
+                return this;
+            }
+
+            /// <summary>
+            /// Sets an optional subsystem name.
+            /// </summary>
+            public Builder<TCollector> WithSubsystem(string subsystem)
+            {
+                Subsystem = (subsystem ?? string.Empty).Trim();
+                return this;
+            }
+
+            /// <summary>
+            /// Set the help string of the metric. Required.
+            /// </summary>
+            public Builder<TCollector> WithHelp(string help)
+            {
+                if (string.IsNullOrWhiteSpace(help))
+                {
+                    throw new ArgumentException("Help text is required.", nameof(help));
+                }
+
+                Help = help.Trim();
+                return this;
+            }
+
+            /// <summary>
+            /// Set the labelNames of the metric. Optional, defaults to no labels.
+            /// </summary>
+            public Builder<TCollector> WithLabels(params string[] labelNames)
+            {
+                LabelNames = labelNames ?? throw new ArgumentNullException(nameof(labelNames));
+                return this;
+            }
+
+            /// <summary>
+            /// Builds the collector without registering.
+            /// </summary>
+            public TCollector Build() => Create();
+
+            /// <summary>
             /// Register the Collector with the default registry.
             /// </summary>
-            public Collector<TChild> Register() => Register(CollectorRegistry.DefaultRegistry);
+            public TCollector Register() => Register(CollectorRegistry.DefaultRegistry);
 
             /// <summary>
             /// Register the Collector with the given registry.
             /// </summary>
-            public Collector<TChild> Register(CollectorRegistry registry)
+            public TCollector Register(CollectorRegistry registry)
             {
                 var collector = Create();
                 registry.Register(collector);

@@ -12,7 +12,7 @@ namespace Hydrogen.Prometheus.Client.Internal
             {
                 initialValue = value;
                 incrementedValue = initialValue + inc;
-            } while (initialValue != Interlocked.CompareExchange(ref value, incrementedValue, incrementedValue));
+            } while (initialValue != Interlocked.CompareExchange(ref value, incrementedValue, initialValue));
         }
     }
 }
