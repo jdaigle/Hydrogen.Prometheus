@@ -2,7 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>A .NET Client Library for Prometheus (see https://prometheus.io)</Description>
+    <PackageTags>prometheus;monitoring</PackageTags>
     <Authors>Joseph Daigle</Authors>
+    <PackageLicenseUrl>https://github.com/jdaigle/Hydrogen.Prometheus/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/jdaigle/Hydrogen.Prometheus</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jdaigle/Hydrogen.Prometheus</RepositoryUrl>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>

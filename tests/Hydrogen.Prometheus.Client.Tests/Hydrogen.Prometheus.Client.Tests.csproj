@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net471;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net471</TargetFrameworks>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>Full</DebugType>
     <xUnitVersion>2.3.1</xUnitVersion>

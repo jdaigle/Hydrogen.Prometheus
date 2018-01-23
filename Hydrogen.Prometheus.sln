@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hydrogen.Prometheus.Client", "Hydrogen.Prometheus.Client\Hydrogen.Prometheus.Client.csproj", "{1F0A28A7-FE50-4D4E-9B0C-7730D6E5038D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hydrogen.Prometheus.Client", "src\Hydrogen.Prometheus.Client\Hydrogen.Prometheus.Client.csproj", "{1F0A28A7-FE50-4D4E-9B0C-7730D6E5038D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C4DE19F1-E416-4B6D-A9C1-57FC080E6DD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hydrogen.Prometheus.Client.Tests", "..\tests\Hydrogen.Prometheus.Client.Tests\Hydrogen.Prometheus.Client.Tests.csproj", "{41123075-40D7-4F25-B762-91DF002F098E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hydrogen.Prometheus.Client.Tests", "tests\Hydrogen.Prometheus.Client.Tests\Hydrogen.Prometheus.Client.Tests.csproj", "{41123075-40D7-4F25-B762-91DF002F098E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
