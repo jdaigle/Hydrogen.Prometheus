@@ -52,11 +52,13 @@ namespace Hydrogen.Prometheus.Client.Exporters
 
         private static async Task WriteAsync(StreamWriter writer, MetricFamilySamples metricFamily)
         {
+            // # HELP familyname helptext
             await writer.WriteAsync("# HELP ");
             await writer.WriteAsync(metricFamily.Name);
             await writer.WriteAsync(" ");
             await WriteEscapedHelpAsync(writer, metricFamily.Help);
 
+            // # TYPE familyname type
             await writer.WriteAsync("# TYPE ");
             await writer.WriteAsync(metricFamily.Name);
             await writer.WriteAsync(" ");
@@ -64,6 +66,9 @@ namespace Hydrogen.Prometheus.Client.Exporters
 
             foreach (var sample in metricFamily.Samples)
             {
+                // metric_name [
+                //   "{" label_name "=" `"` label_value `"` { "," label_name "=" `"` label_value `"` } [ "," ] "}"
+                // ] value [ timestamp ]
                 await writer.WriteAsync(sample.Name);
                 if (sample.LabelNames.Count > 0)
                 {
@@ -78,7 +83,7 @@ namespace Hydrogen.Prometheus.Client.Exporters
                     await writer.WriteAsync('}');
                 }
                 await writer.WriteAsync(' ');
-                await writer.WriteAsync(StringHelpers.DoubleToGoString(sample.Value));
+                await writer.WriteAsync(sample.Value.ConvertToGoString());
                 await writer.WriteAsync('\n');
             }
         }
@@ -132,7 +137,7 @@ namespace Hydrogen.Prometheus.Client.Exporters
             {
                 case CollectorType.Counter:
                     return "counter";
-                case CollectorType.Guage:
+                case CollectorType.Gauge:
                     return "gauge";
                 case CollectorType.Histogram:
                     return "histogram";

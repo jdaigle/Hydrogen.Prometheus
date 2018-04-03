@@ -1,8 +1,15 @@
 ﻿namespace Hydrogen.Prometheus.Client.Internal
 {
-    public class StringHelpers
+    /// <summary>
+    /// Various string helper methods.
+    /// </summary>
+    public static class StringExtensions
     {
-        public static string DoubleToGoString(double d)
+        /// <summary>
+        /// Converts a double value into the Go language compatible wire format.
+        /// </summary>
+        /// <param name="d">The value to convert</param>
+        public static string ConvertToGoString(this double d)
         {
             if (d == double.PositiveInfinity)
             {

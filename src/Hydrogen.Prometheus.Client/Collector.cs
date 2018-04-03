@@ -6,18 +6,35 @@ using Hydrogen.Prometheus.Client.Internal;
 
 namespace Hydrogen.Prometheus.Client
 {
+    /// <summary>
+    /// A collector for a set of metrics.
+    /// </summary>
+    /// <remarks>
+    /// Normal users should use <see cref="Gauge"/>, <see cref="Counter"/>, and <see cref="Histogram"/>.
+    ///
+    /// Subclasssing Collector is for advanced uses, such as proxying metrics from another monitoring system.
+    /// It is it the responsibility of subclasses to ensure they produce valid metrics.
+    ///
+    /// See <a href="http://prometheus.io/docs/instrumenting/exposition_formats/">Exposition formats</a>
+    /// </remarks>
     public abstract class Collector
     {
         private static readonly Regex MetricNameRegex = new Regex("^[a-zA-Z_:][a-zA-Z0-9_:]*$", RegexOptions.Compiled);
         private static readonly Regex MetricLabelNameRegex = new Regex("^[a-zA-Z_][a-zA-Z0-9_]*$", RegexOptions.Compiled);
         private static readonly Regex ReservedMetricLabelNameRegex = new Regex("^__.*", RegexOptions.Compiled);
 
-        protected readonly string _fullname;
-        protected readonly string _help;
-        protected readonly string[] _labelNames;
+        private protected readonly string _fullname;
+        private protected readonly string _help;
+        private protected readonly string[] _labelNames;
 
+        /// <summary>
+        /// The full name of the metric in the format "namespace_subsystem_name".
+        /// </summary>
         public string Name => _fullname;
 
+        /// <summary>
+        /// The metric description or help text.
+        /// </summary>
         public string Help => _help;
 
         private protected Collector(Builder builder)
@@ -61,6 +78,10 @@ namespace Hydrogen.Prometheus.Client
         /// </summary>
         public abstract List<MetricFamilySamples> Collect();
 
+        /// <summary>
+        /// Throws an exception if the metric name is invalid.
+        /// </summary>
+        /// <param name="name">The name to check.</param>
         protected static void CheckMetricName(string name)
         {
             if (!MetricNameRegex.IsMatch(name))
@@ -69,7 +90,11 @@ namespace Hydrogen.Prometheus.Client
             }
         }
 
-        protected static void CheckMetricLabelName(String name)
+        /// <summary>
+        /// Throws an exception if the metric label name is invalid.
+        /// </summary>
+        /// <param name="name">The name to check.</param>
+        protected static void CheckMetricLabelName(string name)
         {
             if (!MetricLabelNameRegex.IsMatch(name))
             {
@@ -81,26 +106,48 @@ namespace Hydrogen.Prometheus.Client
             }
         }
 
+        /// <summary>
+        /// A collector builder.
+        /// </summary>
         public abstract class Builder
         {
+            /// <summary>
+            /// The required name of collector. Used as the "name" field when formatting as "namespace_subsystem_name".
+            /// </summary>
             public string Name { get; protected set; } = string.Empty;
 
+            /// <summary>
+            /// The optional namespace name of collector. Used as the "namespace" field when formatting as "namespace_subsystem_name".
+            /// </summary>
             public string Namespace { get; protected set; } = string.Empty;
 
+            /// <summary>
+            /// The optional subsystem name of collector. Used as the "subsystem" field when formatting as "namespace_subsystem_name".
+            /// </summary>
             public string Subsystem { get; protected set; } = string.Empty;
 
+            /// <summary>
+            /// The required help text for the collector.
+            /// </summary>
             public string Help { get; protected set; } = string.Empty;
 
+            /// <summary>
+            /// A list of optional label names for the collector.
+            /// </summary>
             public string[] LabelNames { get; protected set; } = Array.Empty<string>();
         }
     }
 
+    /// <summary>
+    /// Subclass of <see cref="Collector"/> for a specific collector type that maintains children collectors based on unique labels.
+    /// </summary>
+    /// <typeparam name="TChild">The concrete collector type.</typeparam>
     public abstract class Collector<TChild> : Collector
     {
-        protected readonly ConcurrentDictionary<string[], TChild> _children =
+        private protected readonly ConcurrentDictionary<string[], TChild> _children =
             new ConcurrentDictionary<string[], TChild>(LabelArrayEqualityComparer.Default);
 
-        protected TChild _noLabelsChild;
+        private protected TChild _noLabelsChild;
 
         private protected Collector(Builder builder) : base(builder) { }
 
@@ -108,7 +155,7 @@ namespace Hydrogen.Prometheus.Client
         /// Return the Child with the given labels, creating it if needed.
         /// </summary>
         /// <remarks>
-        /// Must be passed the same number of labels are were passed to {@link #labelNames}.
+        /// Must be passed the same number of labels are were passed to <see cref="Collector.Builder.LabelNames"/>.
         /// </remarks>
         public TChild Labels(params string[] labelValues)
         {
@@ -145,15 +192,15 @@ namespace Hydrogen.Prometheus.Client
             InitializeNoLabelsChild();
         }
 
-        protected abstract TChild NewChild();
+        private protected abstract TChild NewChild();
 
-        protected List<MetricFamilySamples> FamilySamplesList(CollectorType type, List<MetricFamilySamples.Sample> samples) =>
+        private protected List<MetricFamilySamples> FamilySamplesList(CollectorType type, List<MetricFamilySamples.Sample> samples) =>
             new List<MetricFamilySamples>(1)
             {
                new MetricFamilySamples(_fullname, type, _help, samples),
             };
 
-        protected void InitializeNoLabelsChild()
+        private protected void InitializeNoLabelsChild()
         {
             // Initialize metric if it has no labels.
             if (_labelNames.Length == 0)
@@ -162,10 +209,14 @@ namespace Hydrogen.Prometheus.Client
             }
         }
 
+        /// <summary>
+        /// A subclass of <see cref="Collector.Builder"/> which can build a specific type of collector.
+        /// </summary>
+        /// <typeparam name="TCollector">The specific collector type.</typeparam>
         public abstract class Builder<TCollector> : Builder
             where TCollector : Collector<TChild>
         {
-            protected abstract TCollector Create();
+            private protected abstract TCollector Create();
 
             private protected Builder() : base() { }
 

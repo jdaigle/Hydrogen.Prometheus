@@ -5,13 +5,23 @@ using Hydrogen.Prometheus.Client.Internal;
 
 namespace Hydrogen.Prometheus.Client
 {
+    /// <summary>
+    /// Gauge metric, to report instantaneous values.
+    /// </summary>
+    /// <remarks>
+    /// Gauges can go both up and down.
+    /// </remarks>
     public class Gauge : Collector<Gauge.Child>
     {
-        public Gauge(GaugeBuilder builder)
-            : base(builder)
-        {
-        }
+        /// <summary>
+        /// Constructs a new Gauge collector.
+        /// </summary>
+        /// <param name="builder">The Gauge builder.</param>
+        public Gauge(GaugeBuilder builder) : base(builder) { }
 
+        /// <summary>
+        /// Return all of the metrics of this Collector.
+        /// </summary>
         public override List<MetricFamilySamples> Collect()
         {
             var samples = new List<MetricFamilySamples.Sample>(_children.Count);
@@ -19,10 +29,10 @@ namespace Hydrogen.Prometheus.Client
             {
                 samples.Add(new MetricFamilySamples.Sample(_fullname, _labelNames, keyValuePair.Key, keyValuePair.Value.Value));
             }
-            return FamilySamplesList(CollectorType.Guage, samples);
+            return FamilySamplesList(CollectorType.Gauge, samples);
         }
 
-        protected override Child NewChild() => new Child();
+        private protected override Child NewChild() => new Child();
 
         /// <summary>
         /// Return a Builder to allow configuration of a new Gauge. Ensures required fields are provided.
@@ -36,21 +46,27 @@ namespace Hydrogen.Prometheus.Client
         /// </summary>
         public static GaugeBuilder Build() => new GaugeBuilder();
 
+        /// <summary>
+        /// Represents a unique instance of a <see cref="Hydrogen.Prometheus.Client.Gauge"/>.
+        /// </summary>
         public class Child
         {
             private double _value = 0;
 
             internal Child() { }
 
+            /// <summary>
+            /// The current instantaneous value of the Gauge.
+            /// </summary>
             public double Value => _value;
 
             /// <summary>
-            /// Increment the gauge by 1.
+            /// Increment the Gauge by 1.
             /// </summary>
             public void Increment() => Increment(1);
 
             /// <summary>
-            /// Increment the gauge by the given amount.
+            /// Increment the Gauge by the given amount.
             /// </summary>
             public void Increment(double value)
             {
@@ -63,29 +79,32 @@ namespace Hydrogen.Prometheus.Client
             }
 
             /// <summary>
-            /// Decrement the guage by 1.
+            /// Decrement the Gauge by 1.
             /// </summary>
             public void Decrement() => Increment(-1);
 
             /// <summary>
-            /// Decrement the guage by the given amount.
+            /// Decrement the Gauge by the given amount.
             /// </summary>
             public void Decrement(double value) => Increment(-value);
 
             /// <summary>
-            /// Sets the guage to the given value.
+            /// Sets the Gauge to the given value.
             /// </summary>
             public void Set(double value) => Interlocked.Exchange(ref _value, value);
 
             /// <summary>
-            /// Set the gauge to the current unixtime in seconds.
+            /// Set the Gauge to the current unixtime in seconds.
             /// </summary>
             public void SetToCurrentTime() => Set(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         }
 
+        /// <summary>
+        /// The builder for a <see cref="Gauge"/>.
+        /// </summary>
         public class GaugeBuilder : Builder<Gauge>
         {
-            protected override Gauge Create() => new Gauge(this);
+            private protected override Gauge Create() => new Gauge(this);
         }
     }
 }

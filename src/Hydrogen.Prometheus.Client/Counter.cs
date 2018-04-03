@@ -4,13 +4,25 @@ using Hydrogen.Prometheus.Client.Internal;
 
 namespace Hydrogen.Prometheus.Client
 {
+    /// <summary>
+    /// Counter metric, to track counts of events or running totals.
+    /// </summary>
+    /// <remarks>
+    /// Counters can only go up (and be reset), if your use case can go down you should use a <see cref="Gauge"/> instead.
+    /// Use the <c>rate()</c> function in Prometheus to calculate the rate of increase of a Counter.
+    /// By convention, the names of Counters are suffixed by <c>_total</c>
+    /// </remarks>
     public class Counter : Collector<Counter.Child>
     {
-        public Counter(CounterBuilder builder)
-            : base(builder)
-        {
-        }
+        /// <summary>
+        /// Constructs a new Counter collector.
+        /// </summary>
+        /// <param name="builder">The Counter builder.</param>
+        public Counter(CounterBuilder builder) : base(builder) { }
 
+        /// <summary>
+        /// Return all of the metrics of this Collector.
+        /// </summary>
         public override List<MetricFamilySamples> Collect()
         {
             var samples = new List<MetricFamilySamples.Sample>(_children.Count);
@@ -21,7 +33,7 @@ namespace Hydrogen.Prometheus.Client
             return FamilySamplesList(CollectorType.Counter, samples);
         }
 
-        protected override Child NewChild() => new Child();
+        private protected override Child NewChild() => new Child();
 
         /// <summary>
         /// Return a Builder to allow configuration of a new Counter. Ensures required fields are provided.
@@ -35,21 +47,27 @@ namespace Hydrogen.Prometheus.Client
         /// </summary>
         public static CounterBuilder Build() => new CounterBuilder();
 
+        /// <summary>
+        /// Represents a unique instance of a <see cref="Hydrogen.Prometheus.Client.Counter"/>.
+        /// </summary>
         public class Child
         {
             private double _value = 0;
 
             internal Child() { }
 
+            /// <summary>
+            /// The current Counter value.
+            /// </summary>
             public double Value => _value;
 
             /// <summary>
-            /// Increment the counter by 1.
+            /// Increment the Counter by 1.
             /// </summary>
             public void Increment() => Increment(1);
 
             /// <summary>
-            /// Increment the counter by the given amount.
+            /// Increment the Counter by the given amount.
             /// </summary>
             public void Increment(double inc)
             {
@@ -67,9 +85,12 @@ namespace Hydrogen.Prometheus.Client
             }
         }
 
+        /// <summary>
+        /// The builder for a <see cref="Counter"/>.
+        /// </summary>
         public class CounterBuilder : Builder<Counter>
         {
-            protected override Counter Create() => new Counter(this);
+            private protected override Counter Create() => new Counter(this);
         }
     }
 }
