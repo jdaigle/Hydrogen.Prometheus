@@ -27,7 +27,7 @@ namespace Hydrogen.Prometheus.Client
             var samples = new List<MetricFamilySamples.Sample>(_children.Count);
             foreach (var keyValuePair in _children)
             {
-                samples.Add(new MetricFamilySamples.Sample(_fullname, _labelNames, keyValuePair.Key, keyValuePair.Value.Value));
+                samples.Add(new MetricFamilySamples.Sample(Name, LabelNames, keyValuePair.Key, keyValuePair.Value.Value));
             }
             return FamilySamplesList(CollectorType.Gauge, samples);
         }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hydrogen.Prometheus.Client
 {
@@ -23,13 +21,31 @@ namespace Hydrogen.Prometheus.Client
         /// </summary>
         public static readonly CollectorRegistry DefaultRegistry = new CollectorRegistry();
 
+        private readonly Dictionary<Collector, IList<string>> _collectorToNames = new Dictionary<Collector, IList<string>>();
+        private readonly Dictionary<string, Collector> _namesToCollectors = new Dictionary<string, Collector>(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>
         /// Register a Collector.
         /// </summary>
         /// <param name="collector"></param>
         public void Register(Collector collector)
         {
-
+            var names = CollectorNames(collector);
+            lock (_collectorToNames)
+            {
+                foreach (var name in names)
+                {
+                    if (_namesToCollectors.ContainsKey(name))
+                    {
+                        throw new ArgumentException("Collector already registered that provides name: " + name);
+                    }
+                }
+                foreach (var name in names)
+                {
+                    _namesToCollectors[name] = collector;
+                }
+                _collectorToNames[collector] = names;
+            }
         }
 
         /// <summary>
@@ -38,7 +54,34 @@ namespace Hydrogen.Prometheus.Client
         /// <param name="collector"></param>
         public void Unregister(Collector collector)
         {
+            lock (_collectorToNames)
+            {
+                if (_collectorToNames.TryGetValue(collector, out var names))
+                {
+                    _collectorToNames.Remove(collector);
+                    foreach (var name in names)
+                    {
+                        _namesToCollectors.Remove(name);
+                    }
+                }
+            }
+        }
 
+        /// <summary>
+        /// Enumeration of metrics of all registered collectors.
+        /// </summary>
+        public IEnumerable<MetricFamilySamples> MetricFamilySamples() => _collectorToNames.Keys.ToList().SelectMany(x => x.Collect());
+
+        private static IList<string> CollectorNames(Collector collector)
+        {
+            var name = collector.Name;
+            switch (collector)
+            {
+                case Histogram historgram:
+                    return new string[] { name + "_count", name + "_sum", name + "_bucket", name };
+                default:
+                    return new string[] { name };
+            }
         }
     }
 }

@@ -23,19 +23,20 @@ namespace Hydrogen.Prometheus.Client
         private static readonly Regex MetricLabelNameRegex = new Regex("^[a-zA-Z_][a-zA-Z0-9_]*$", RegexOptions.Compiled);
         private static readonly Regex ReservedMetricLabelNameRegex = new Regex("^__.*", RegexOptions.Compiled);
 
-        private protected readonly string _fullname;
-        private protected readonly string _help;
-        private protected readonly string[] _labelNames;
-
         /// <summary>
         /// The full name of the metric in the format "namespace_subsystem_name".
         /// </summary>
-        public string Name => _fullname;
+        public string Name { get; }
 
         /// <summary>
         /// The metric description or help text.
         /// </summary>
-        public string Help => _help;
+        public string Help { get; }
+
+        /// <summary>
+        /// The names of the labels for this collector.
+        /// </summary>
+        public string[] LabelNames { get; }
 
         private protected Collector(Builder builder)
         {
@@ -57,17 +58,17 @@ namespace Hydrogen.Prometheus.Client
             {
                 name = builder.Namespace + "_" + name;
             }
-            _fullname = name;
-            CheckMetricName(_fullname);
+            Name = name;
+            CheckMetricName(Name);
 
             if (string.IsNullOrWhiteSpace(builder.Help))
             {
                 throw new ArgumentNullException(nameof(builder.Help), "Help hasn't been set.");
             }
-            _help = builder.Help;
+            Help = builder.Help;
 
-            _labelNames = builder.LabelNames ?? Array.Empty<string>();
-            foreach (var labelName in _labelNames)
+            LabelNames = builder.LabelNames ?? Array.Empty<string>();
+            foreach (var labelName in LabelNames)
             {
                 CheckMetricLabelName(labelName);
             }
@@ -163,7 +164,7 @@ namespace Hydrogen.Prometheus.Client
             {
                 throw new ArgumentNullException(nameof(labelValues));
             }
-            if (labelValues.Length != _labelNames.Length)
+            if (labelValues.Length != LabelNames.Length)
             {
                 throw new ArgumentException(nameof(labelValues), "Incorrect number of labels.");
             }
@@ -197,13 +198,13 @@ namespace Hydrogen.Prometheus.Client
         private protected List<MetricFamilySamples> FamilySamplesList(CollectorType type, List<MetricFamilySamples.Sample> samples) =>
             new List<MetricFamilySamples>(1)
             {
-               new MetricFamilySamples(_fullname, type, _help, samples),
+               new MetricFamilySamples(Name, type, Help, samples),
             };
 
         private protected void InitializeNoLabelsChild()
         {
             // Initialize metric if it has no labels.
-            if (_labelNames.Length == 0)
+            if (LabelNames.Length == 0)
             {
                 _noLabelsChild = Labels();
             }

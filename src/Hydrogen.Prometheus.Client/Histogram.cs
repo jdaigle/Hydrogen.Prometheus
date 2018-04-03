@@ -40,7 +40,7 @@ namespace Hydrogen.Prometheus.Client
             var samples = new List<MetricFamilySamples.Sample>(_children.Count);
             foreach (var keyValuePair in _children)
             {
-                var labelNamesWithLe = new List<string>(_labelNames)
+                var labelNamesWithLe = new List<string>(LabelNames)
                 {
                     "le"
                 };
@@ -51,11 +51,11 @@ namespace Hydrogen.Prometheus.Client
                     {
                         StringExtensions.ConvertToGoString(buckets[i])
                     };
-                    samples.Add(new MetricFamilySamples.Sample(_fullname + "_bucket", labelNamesWithLe, labelValuesWithLe, buckets[i]));
+                    samples.Add(new MetricFamilySamples.Sample(Name + "_bucket", labelNamesWithLe, labelValuesWithLe, buckets[i]));
                 }
 
-                samples.Add(new MetricFamilySamples.Sample(_fullname + "_count", _labelNames, keyValuePair.Key, buckets[buckets.Length - 1]));
-                samples.Add(new MetricFamilySamples.Sample(_fullname + "_sum", _labelNames, keyValuePair.Key, sum));
+                samples.Add(new MetricFamilySamples.Sample(Name + "_count", LabelNames, keyValuePair.Key, buckets[buckets.Length - 1]));
+                samples.Add(new MetricFamilySamples.Sample(Name + "_sum", LabelNames, keyValuePair.Key, sum));
             }
             return FamilySamplesList(CollectorType.Histogram, samples);
         }
