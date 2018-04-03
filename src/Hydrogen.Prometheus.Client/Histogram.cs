@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Hydrogen.Prometheus.Client.Internal;
 
 namespace Hydrogen.Prometheus.Client
@@ -96,15 +97,12 @@ namespace Hydrogen.Prometheus.Client
             /// <param name="value">The amount to observe.</param>
             public void Observe(double value)
             {
-                for (int i = 0; i < _upperBounds.Length; ++i)
+                var pos = Array.BinarySearch(_upperBounds, value, Comparer<double>.Default);
+                if (pos < 0)
                 {
-                    // The last bucket is +Inf, so we always increment.
-                    if (value <= _upperBounds[i])
-                    {
-                        ThreadSafeDouble.Add(ref _upperBounds[i], value);
-                        break;
-                    }
+                    pos = ~pos;
                 }
+                ThreadSafeDouble.Add(ref _upperBounds[pos], value);
                 ThreadSafeDouble.Add(ref _sum, value);
             }
 
@@ -114,10 +112,10 @@ namespace Hydrogen.Prometheus.Client
                 double accum = 0;
                 for (var i = 0; i < _cumulativeCounts.Length; i++)
                 {
-                    accum += _cumulativeCounts[i];
+                    accum += Volatile.Read(ref _cumulativeCounts[i]);
                     buckets[i] = accum;
                 }
-                return (buckets, _sum);
+                return (buckets, Volatile.Read(ref _sum));
             }
         }
 

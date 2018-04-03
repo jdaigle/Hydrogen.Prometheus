@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Hydrogen.Prometheus.Client.Internal;
 
 namespace Hydrogen.Prometheus.Client
@@ -59,7 +60,7 @@ namespace Hydrogen.Prometheus.Client
             /// <summary>
             /// The current Counter value.
             /// </summary>
-            public double Value => _value;
+            public double Value => Volatile.Read(ref _value);
 
             /// <summary>
             /// Increment the Counter by 1.

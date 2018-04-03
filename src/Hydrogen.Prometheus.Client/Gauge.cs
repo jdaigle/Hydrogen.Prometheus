@@ -58,7 +58,7 @@ namespace Hydrogen.Prometheus.Client
             /// <summary>
             /// The current instantaneous value of the Gauge.
             /// </summary>
-            public double Value => _value;
+            public double Value => Volatile.Read(ref _value);
 
             /// <summary>
             /// Increment the Gauge by 1.
