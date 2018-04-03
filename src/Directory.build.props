@@ -1,0 +1,27 @@
+<Project>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <LangVersion>latest</LangVersion>
+
+    <PackageId>$(AssemblyName)</PackageId>
+    <Authors>Joseph Daigle</Authors>
+    <PackageLicenseUrl>https://github.com/jdaigle/Hydrogen.Prometheus/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/jdaigle/Hydrogen.Prometheus</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jdaigle/Hydrogen.Prometheus</RepositoryUrl>
+
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <IncludeSymbols>true</IncludeSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="2.1.23" PrivateAssets="all" />
+    <PackageReference Include="SourceLink.Create.GitHub" Version="2.8.0" PrivateAssets="All" />
+    <DotNetCliToolReference Include="dotnet-sourcelink" Version="2.8.0" />
+    <DotNetCliToolReference Include="dotnet-sourcelink-git" Version="2.8.0" />
+  </ItemGroup>
+</Project>
